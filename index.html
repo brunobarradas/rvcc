@@ -842,6 +842,8 @@ async function sbUpdateRelatorio(ref, url) {
     body: JSON.stringify({ url_relatorio: url })
   });
 }
+
+async function sbQuery(filtro) {
   let url = SUPABASE_URL + '/rest/v1/entrevistas?select=*&order=created_at.desc&limit=50';
   if (filtro) url += '&or=(nome.ilike.*' + filtro + '*,bi.ilike.*' + filtro + '*)';
   const res = await fetch(url, {
