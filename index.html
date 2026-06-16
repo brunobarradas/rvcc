@@ -853,6 +853,8 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
 
 </div><!-- /.main -->
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 const WORKER_URL = 'https://rvcc.bruno-barradas-79.workers.dev';
@@ -1155,21 +1157,9 @@ async function autoGeneratePDF(ref) {
     btn.textContent = '⏳ A gerar PDF...';
     btn.disabled = true;
 
-    const element = document.querySelector('.report-wrap');
-    const opt = {
-      margin: [10, 10, 10, 10],
-      filename: ref + '.pdf',
-      image: { type: 'jpeg', quality: 0.95 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
-    const filename = ref + '_' + Date.now() + '.pdf';
-    const url = await sbUploadPDF(filename, blob);
+    const url = await buildAndUploadPDF(ref);
 
     if (url) {
-      await sbUpdateRelatorio(ref, url);
       btn.textContent = '📄 Ver PDF';
       btn.disabled = false;
       btn.onclick = () => window.open(url, '_blank');
@@ -1187,46 +1177,104 @@ async function autoGeneratePDF(ref) {
   }
 }
 
+async function buildAndUploadPDF(ref) {
+  const pages = document.querySelectorAll('.report-page');
+  if (!pages.length) return null;
+
+  const opt = {
+    margin: 0,
+    image: { type: 'jpeg', quality: 0.97 },
+    html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Gerar PDF página a página e juntar
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    const canvas = await html2canvas(page, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      width: page.scrollWidth,
+      height: page.scrollHeight,
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.97);
+    const pageWidth = 210;  // A4 mm
+    const pageHeight = 297; // A4 mm
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+    if (i > 0) doc.addPage();
+
+    // Se o conteúdo é maior que A4, divide em sub-páginas
+    if (imgHeight <= pageHeight) {
+      doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+    } else {
+      let yPos = 0;
+      let remaining = imgHeight;
+      let firstSlice = true;
+      while (remaining > 0) {
+        if (!firstSlice) doc.addPage();
+        const sliceHeight = Math.min(pageHeight, remaining);
+        const srcY = yPos * (canvas.height / imgHeight);
+        const srcH = sliceHeight * (canvas.height / imgHeight);
+
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = srcH;
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+
+        doc.addImage(sliceCanvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, imgWidth, sliceHeight);
+        yPos += sliceHeight;
+        remaining -= sliceHeight;
+        firstSlice = false;
+      }
+    }
+  }
+
+  const blob = doc.output('blob');
+  const filename = ref + '_' + Date.now() + '.pdf';
+  const url = await sbUploadPDF(filename, blob);
+  if (url) await sbUpdateRelatorio(ref, url);
+  return url;
+}
+
 async function generateAndSavePDF() {
   const btn = document.getElementById('btnPDF');
-  const refEl = document.getElementById('rRefNum');
-  const ref = refEl ? refEl.textContent : 'relatorio';
-
-  // Se já foi gerado e guardado, abrir directamente
-  if (btn.textContent === '✅ PDF Guardado') { btn.click(); return; }
+  const ref = document.getElementById('rRefNum')?.textContent || 'relatorio';
 
   btn.textContent = '⏳ A gerar PDF...';
   btn.disabled = true;
 
-  const element = document.querySelector('.report-wrap');
-  const opt = {
-    margin: [10, 10, 10, 10],
-    filename: ref + '.pdf',
-    image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
   try {
-    const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
-    const filename = ref + '_' + Date.now() + '.pdf';
-    const url = await sbUploadPDF(filename, blob);
-
+    const url = await buildAndUploadPDF(ref);
     if (url) {
-      await sbUpdateRelatorio(ref, url);
-      btn.textContent = '✅ PDF Guardado';
+      btn.textContent = '📄 Ver PDF';
       btn.disabled = false;
       btn.onclick = () => window.open(url, '_blank');
       window.open(url, '_blank');
     } else {
-      // Fallback — download local
-      await html2pdf().set(opt).from(element).save();
-      btn.textContent = '🖨 Imprimir / Guardar PDF';
+      // Fallback — download local com html2pdf
+      const element = document.querySelector('.report-wrap');
+      await html2pdf().set({
+        margin: [8, 8, 8, 8],
+        filename: ref + '.pdf',
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+      btn.textContent = '🖨 Guardar PDF';
       btn.disabled = false;
     }
   } catch (err) {
     console.error(err);
-    btn.textContent = '🖨 Imprimir / Guardar PDF';
+    btn.textContent = '🖨 Guardar PDF';
     btn.disabled = false;
   }
 }
