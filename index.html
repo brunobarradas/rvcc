@@ -1028,7 +1028,7 @@ async function sendMessage() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, system: buildSystem(), messages: history }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 600, system: buildSystem(), messages: history }),
     });
     const data = await res.json();
     removeTyping();
@@ -1064,7 +1064,7 @@ async function requestReport() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: buildSystem(), messages: history }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: buildSystem(), messages: history }),
     });
     const data = await res.json();
     removeTyping();
