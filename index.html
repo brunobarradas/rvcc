@@ -891,16 +891,18 @@ async function sbUploadPDF(filename, blob) {
 }
 
 async function sbUpdateRelatorio(ref, url) {
-  await fetch(SUPABASE_URL + '/rest/v1/entrevistas?referencia=eq.' + encodeURIComponent(ref), {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/entrevistas?referencia=eq.' + encodeURIComponent(ref), {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_KEY,
       'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Prefer': 'return=minimal'
+      'Prefer': 'return=representation'
     },
     body: JSON.stringify({ url_relatorio: url })
   });
+  if (!res.ok) console.error('Erro ao actualizar URL do PDF:', await res.text());
+  return res.ok;
 }
 
 async function sbQuery(filtro) {
@@ -1168,16 +1170,18 @@ async function autoGeneratePDF(ref) {
 
     if (url) {
       await sbUpdateRelatorio(ref, url);
-      btn.textContent = '✅ PDF Guardado';
-      btn.onclick = () => window.open(url, '_blank');
-    } else {
-      btn.textContent = '🖨 Imprimir / Guardar PDF';
-      btn.onclick = () => generateAndSavePDF();
+      btn.textContent = '📄 Ver PDF';
       btn.disabled = false;
+      btn.onclick = () => window.open(url, '_blank');
+      window.open(url, '_blank');
+    } else {
+      btn.textContent = '🖨 Guardar PDF';
+      btn.disabled = false;
+      btn.onclick = () => generateAndSavePDF();
     }
   } catch (err) {
     console.error('Erro PDF:', err);
-    btn.textContent = '🖨 Imprimir / Guardar PDF';
+    btn.textContent = '🖨 Guardar PDF';
     btn.disabled = false;
     btn.onclick = () => generateAndSavePDF();
   }
