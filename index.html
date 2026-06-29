@@ -1337,7 +1337,7 @@ async function loadHistory() {
       '<div style="font-size:12px">' + (r.centro_qualifica || '—') + '</div>' +
       '<div style="font-size:12px">' + dataStr + '</div>' +
       '<div><span class="ht-badge">' + (r.perfil_nivel || '—') + '</span></div>' +
-      '<div onclick="event.stopPropagation()"><button class="btn-delete" onclick="deleteRecord(\'' + r.id + '\', \'' + (r.nome || '') + '\')">🗑 Apagar</button></div>' +
+      '<div onclick="event.stopPropagation()">' + (currentUser && currentUser.role === 'admin' ? '<button class="btn-delete" onclick="deleteRecord(\'' + r.id + '\', \'' + (r.nome || '') + '\')">🗑 Apagar</button>' : '') + '</div>' +
     '</div>';
   }).join('');
 }
