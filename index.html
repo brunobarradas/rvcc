@@ -331,12 +331,14 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
 .btn-back { background: var(--dark); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
 
 .history-table { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
-.ht-head { display: grid; grid-template-columns: 140px 1fr 1fr 140px 120px 90px; gap: 0; background: var(--dark); color: rgba(255,255,255,0.7); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.ht-head { display: grid; grid-template-columns: 140px 1fr 1fr 140px 120px 90px 70px; gap: 0; background: var(--dark); color: rgba(255,255,255,0.7); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 .ht-head div, .ht-row div { padding: 11px 14px; }
-.ht-row { display: grid; grid-template-columns: 140px 1fr 1fr 140px 120px 90px; border-bottom: 1px solid #edf0f3; font-size: 13px; transition: background 0.15s; cursor: pointer; }
+.ht-row { display: grid; grid-template-columns: 140px 1fr 1fr 140px 120px 90px 70px; border-bottom: 1px solid #edf0f3; font-size: 13px; transition: background 0.15s; cursor: pointer; }
 .ht-row:last-child { border-bottom: none; }
 .ht-row:hover { background: var(--accent-light); }
 .ht-badge { display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 4px; background: rgba(26,95,168,0.1); color: var(--accent); font-weight: 600; }
+.btn-delete { background: transparent; border: 1px solid rgba(200,0,10,0.25); color: rgba(200,0,10,0.7); border-radius: 5px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+.btn-delete:hover { background: rgba(200,0,10,0.08); border-color: var(--accent); color: var(--accent); }
 .ht-empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
 .ht-loading { text-align: center; padding: 40px; color: var(--muted); }
 
@@ -845,6 +847,7 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
           <div>Centro Qualifica</div>
           <div>Data</div>
           <div>Nível</div>
+          <div></div>
         </div>
         <div id="historyBody"><div class="ht-loading">A carregar...</div></div>
       </div>
@@ -1178,71 +1181,68 @@ async function autoGeneratePDF(ref) {
 }
 
 async function buildAndUploadPDF(ref) {
-  const pages = document.querySelectorAll('.report-page');
-  if (!pages.length) return null;
-
-  const opt = {
-    margin: 0,
-    image: { type: 'jpeg', quality: 0.97 },
-    html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  // Gerar PDF página a página e juntar
+  const wrap = document.querySelector('.report-wrap');
+  const actions = document.querySelector('.report-actions');
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i];
-    const canvas = await html2canvas(page, {
+  // Esconder botões durante a captura
+  actions.style.display = 'none';
+
+  try {
+    const canvas = await html2canvas(wrap, {
       scale: 2,
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      width: page.scrollWidth,
-      height: page.scrollHeight,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: wrap.scrollWidth,
+      windowHeight: wrap.scrollHeight,
     });
 
+    actions.style.display = '';
+
     const imgData = canvas.toDataURL('image/jpeg', 0.97);
-    const pageWidth = 210;  // A4 mm
-    const pageHeight = 297; // A4 mm
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    const pageW = 210;
+    const pageH = 297;
+    const imgW = pageW;
+    const imgH = (canvas.height * pageW) / canvas.width;
 
-    if (i > 0) doc.addPage();
+    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-    // Se o conteúdo é maior que A4, divide em sub-páginas
-    if (imgHeight <= pageHeight) {
-      doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-    } else {
-      let yPos = 0;
-      let remaining = imgHeight;
-      let firstSlice = true;
-      while (remaining > 0) {
-        if (!firstSlice) doc.addPage();
-        const sliceHeight = Math.min(pageHeight, remaining);
-        const srcY = yPos * (canvas.height / imgHeight);
-        const srcH = sliceHeight * (canvas.height / imgHeight);
+    let yRemaining = imgH;
+    let yOffset = 0;
 
-        const sliceCanvas = document.createElement('canvas');
-        sliceCanvas.width = canvas.width;
-        sliceCanvas.height = srcH;
-        const ctx = sliceCanvas.getContext('2d');
-        ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+    while (yRemaining > 0) {
+      const sliceH = Math.min(pageH, yRemaining);
+      const srcY = yOffset * (canvas.height / imgH);
+      const srcH = sliceH * (canvas.height / imgH);
 
-        doc.addImage(sliceCanvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, imgWidth, sliceHeight);
-        yPos += sliceHeight;
-        remaining -= sliceHeight;
-        firstSlice = false;
-      }
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = Math.round(srcH);
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+      ctx.drawImage(canvas, 0, Math.round(srcY), canvas.width, Math.round(srcH), 0, 0, canvas.width, Math.round(srcH));
+
+      if (yOffset > 0) doc.addPage();
+      doc.addImage(sliceCanvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, imgW, sliceH);
+
+      yOffset += sliceH;
+      yRemaining -= sliceH;
     }
-  }
 
-  const blob = doc.output('blob');
-  const filename = ref + '_' + Date.now() + '.pdf';
-  const url = await sbUploadPDF(filename, blob);
-  if (url) await sbUpdateRelatorio(ref, url);
-  return url;
+    const blob = doc.output('blob');
+    const filename = ref + '_' + Date.now() + '.pdf';
+    const url = await sbUploadPDF(filename, blob);
+    if (url) await sbUpdateRelatorio(ref, url);
+    return url;
+
+  } catch (err) {
+    actions.style.display = '';
+    throw err;
+  }
 }
 
 async function generateAndSavePDF() {
@@ -1292,6 +1292,25 @@ function restart() {
   updateProgress(0);
 }
 
+async function deleteRecord(id, nome) {
+  if (!confirm('Tem a certeza que pretende eliminar o registo de "' + nome + '"?\n\nEsta acção é irreversível.')) return;
+
+  const res = await fetch(SUPABASE_URL + '/rest/v1/entrevistas?id=eq.' + id, {
+    method: 'DELETE',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'return=minimal'
+    }
+  });
+
+  if (res.ok) {
+    await loadHistory();
+  } else {
+    alert('Erro ao eliminar o registo. Por favor tente novamente.');
+  }
+}
+
 async function showHistory() {
   showScreen('screenHistory');
   document.getElementById('stepPill').textContent = 'Histórico';
@@ -1318,6 +1337,7 @@ async function loadHistory() {
       '<div style="font-size:12px">' + (r.centro_qualifica || '—') + '</div>' +
       '<div style="font-size:12px">' + dataStr + '</div>' +
       '<div><span class="ht-badge">' + (r.perfil_nivel || '—') + '</span></div>' +
+      '<div onclick="event.stopPropagation()"><button class="btn-delete" onclick="deleteRecord(\'' + r.id + '\', \'' + (r.nome || '') + '\')">🗑 Apagar</button></div>' +
     '</div>';
   }).join('');
 }
