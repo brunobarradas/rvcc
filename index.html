@@ -477,6 +477,7 @@ input[type="file"] { width: 100%; padding: 9px 12px; border: 1.5px solid var(--b
     <span class="step-pill" id="stepPill">Passo 1 de 3</span>
     <button class="btn-history" onclick="showHistory()">📋 Histórico</button>
     <button class="btn-history" onclick="showReferenciais()">📚 Referenciais</button>
+    <button class="btn-history" onclick="showSaidasProfissionais(this)">🎯 Saídas Profissionais</button>
     <div class="user-info hidden" id="userInfo">
       <span class="user-badge" id="userBadge">—</span>
       <button class="btn-logout" onclick="doLogout()">Sair</button>
@@ -1687,10 +1688,72 @@ async function deleteReferencial(id, filename) {
   }
 }
 
+// ── Saídas Profissionais (Admin) ─────────────────────────────────────────────
+async function showSaidasProfissionais(btn) {
+  if (!currentUser) {
+    pendingSaidas = true;
+    showScreen('screenLogin');
+    return;
+  }
+  if (currentUser.role !== 'admin') {
+    alert('Apenas administradores podem consultar as saídas profissionais.');
+    return;
+  }
+  const originalLabel = btn ? btn.textContent : null;
+  if (btn) { btn.textContent = 'A carregar...'; btn.disabled = true; }
+  await loadActiveProfiles();
+  if (btn) { btn.textContent = originalLabel; btn.disabled = false; }
+  renderSaidasModal();
+}
+
+function renderSaidasModal() {
+  const grupos = {};
+  Object.values(ACTIVE_PROFILES).forEach(p => {
+    if (!grupos[p.familia]) grupos[p.familia] = [];
+    grupos[p.familia].push(p);
+  });
+  const total = Object.keys(ACTIVE_PROFILES).length;
+
+  const secoes = Object.entries(grupos).sort((a, b) => a[0].localeCompare(b[0])).map(([familia, perfis]) => {
+    const items = perfis.sort((a, b) => a.name.localeCompare(b.name)).map(p =>
+      '<div class="dp-step"><div style="flex:1">' + p.name + '</div><div><span class="ht-badge">' + p.nivel + '</span></div></div>'
+    ).join('');
+    return '<div class="dp-section"><div class="dp-section-title">' + familia + ' (' + perfis.length + ')</div>' + items + '</div>';
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'detail-overlay';
+  overlay.id = 'saidasOverlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeSaidas(); };
+
+  overlay.innerHTML = `
+    <div class="detail-panel">
+      <div class="dp-header">
+        <h3>Saídas Profissionais Previstas (${total})</h3>
+        <button class="dp-close" onclick="closeSaidas()">✕</button>
+      </div>
+      <div class="dp-blue-bar"></div>
+      <div class="dp-body">${secoes || '<div class="ht-empty">Nenhum perfil disponível.</div>'}</div>
+      <div class="dp-footer">
+        <button class="dp-btn-close" onclick="closeSaidas()" style="flex:1">Fechar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSaidas() {
+  const overlay = document.getElementById('saidasOverlay');
+  if (overlay) overlay.remove();
+  document.body.style.overflow = '';
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 let currentUser = null;
 let pendingHistory = false; // true when login was triggered by "Histórico"
 let pendingReferenciais = false; // true when login was triggered by "Referenciais"
+let pendingSaidas = false; // true when login was triggered by "Saídas Profissionais"
 
 async function doLogin() {
   const user = document.getElementById('lUser').value.trim();
@@ -1721,6 +1784,15 @@ async function doLogin() {
       } else if (pendingReferenciais) {
         pendingReferenciais = false;
         await showReferenciais();
+      } else if (pendingSaidas) {
+        pendingSaidas = false;
+        if (currentUser.role === 'admin') {
+          await loadActiveProfiles();
+          renderSaidasModal();
+        }
+        showScreen('screenForm');
+        document.getElementById('stepPill').textContent = 'Passo 1 de 3';
+        updateProgress(0);
       } else {
         showScreen('screenForm');
         document.getElementById('stepPill').textContent = 'Passo 1 de 3';
@@ -1742,6 +1814,7 @@ function doLogout() {
   currentUser = null;
   pendingHistory = false;
   pendingReferenciais = false;
+  pendingSaidas = false;
   document.getElementById('userInfo').classList.add('hidden');
   document.getElementById('stepPill').textContent = '';
   updateProgress(0);
