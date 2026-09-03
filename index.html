@@ -342,6 +342,20 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
 .ht-empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
 .ht-loading { text-align: center; padding: 40px; color: var(--muted); }
 
+.ref-upload-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+.ref-upload-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; margin-bottom: 16px; }
+input[type="file"] { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; box-sizing: border-box; }
+.ref-upload-status { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: 8px; }
+.ref-upload-status.ok { background: rgba(26,110,58,0.08); color: var(--success); border: 1px solid rgba(26,110,58,0.2); }
+.ref-upload-status.err { background: rgba(200,0,10,0.08); color: #c8000a; border: 1px solid rgba(200,0,10,0.2); }
+.ref-table { width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-top: 24px; }
+.ref-head { display: grid; grid-template-columns: 1fr 1fr 90px 110px 70px 60px; background: var(--dark); color: rgba(255,255,255,0.7); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.ref-head div, .ref-row div { padding: 11px 14px; }
+.ref-row { display: grid; grid-template-columns: 1fr 1fr 90px 110px 70px 60px; border-bottom: 1px solid #edf0f3; font-size: 13px; align-items: center; }
+.ref-row:last-child { border-bottom: none; }
+.btn-ver-pdf { background: transparent; border: 1px solid rgba(26,95,168,0.3); color: var(--accent); border-radius: 5px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-block; white-space: nowrap; }
+.btn-ver-pdf:hover { background: var(--accent-light); }
+
 /* ══ PAINEL DE DETALHE ══ */
 .detail-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55);
@@ -412,6 +426,8 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
   .form-card { padding: 28px 20px; }
   .rp-fields, .rp-two-col, .rp-signatures { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
+  .ref-head { display: none; }
+  .ref-row { grid-template-columns: 1fr; gap: 2px; }
 }
 
 .hidden { display: none !important; }
@@ -460,6 +476,7 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
     <h1>RVCC <span>Profissional</span> — Orientação de Perfil</h1>
     <span class="step-pill" id="stepPill">Passo 1 de 3</span>
     <button class="btn-history" onclick="showHistory()">📋 Histórico</button>
+    <button class="btn-history" onclick="showReferenciais()">📚 Referenciais</button>
     <div class="user-info hidden" id="userInfo">
       <span class="user-badge" id="userBadge">—</span>
       <button class="btn-logout" onclick="doLogout()">Sair</button>
@@ -506,126 +523,9 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
         <input type="text" id="fNome" placeholder="Ex: João Manuel da Silva" />
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Número de Bilhete de Identidade</label>
-          <input type="text" id="fBI" placeholder="Ex: 004567890LA042" />
-        </div>
-        <div class="form-group">
-          <label>Província</label>
-          <div class="select-wrap">
-            <select id="fProvincia">
-              <option value="">Selecione...</option>
-              <option>Bengo</option>
-              <option>Benguela</option>
-              <option>Bié</option>
-              <option>Cabinda</option>
-              <option>Cuando</option>
-              <option>Cubango</option>
-              <option>Cuanza Norte</option>
-              <option>Cuanza Sul</option>
-              <option>Cunene</option>
-              <option>Huambo</option>
-              <option>Huíla</option>
-              <option>Icolo e Bengo</option>
-              <option>Luanda</option>
-              <option>Lunda Norte</option>
-              <option>Lunda Sul</option>
-              <option>Malanje</option>
-              <option>Moxico</option>
-              <option>Moxico Leste</option>
-              <option>Namibe</option>
-              <option>Uíge</option>
-              <option>Zaire</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Telefone</label>
-          <input type="text" id="fTelefone" placeholder="Ex: +244 9XX XXX XXX" />
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="text" id="fEmail" placeholder="Ex: joao.silva@email.com" />
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Área de trabalho</label>
-          <div class="select-wrap">
-            <select id="fArea">
-              <option value="">Selecione...</option>
-              <option>Administração / Escritório</option>
-              <option>Contabilidade / Finanças</option>
-              <option>Restauração / Hotelaria</option>
-              <option>Construção Civil</option>
-              <option>Electricidade / Energias</option>
-              <option>Metalurgia / Serralharia</option>
-              <option>Outra área</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Anos de experiência</label>
-          <div class="select-wrap">
-            <select id="fAnos">
-              <option value="">Selecione...</option>
-              <option>Menos de 1 ano</option>
-              <option>1 a 3 anos</option>
-              <option>3 a 5 anos</option>
-              <option>5 a 10 anos</option>
-              <option>Mais de 10 anos</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
       <div class="form-group">
-        <label>Descrição da actividade profissional</label>
-        <textarea class="form-ta" id="fDesc" placeholder="Descreva as suas principais tarefas e responsabilidades no trabalho..."></textarea>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Habilitações escolares</label>
-          <div class="select-wrap">
-            <select id="fHab">
-              <option value="">Selecione...</option>
-              <option>Menos do 6º ano</option>
-              <option>6º ano</option>
-              <option>9º ano</option>
-              <option>12º ano</option>
-              <option>Ensino superior</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Situação profissional</label>
-          <div class="select-wrap">
-            <select id="fSit">
-              <option value="">Selecione...</option>
-              <option>Empregado por conta de outrem</option>
-              <option>Trabalhador independente</option>
-              <option>Desempregado</option>
-              <option>Reformado</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Técnico RVC / Entrevistador</label>
-          <input type="text" id="fTecnico" placeholder="Nome do técnico responsável" />
-        </div>
-        <div class="form-group">
-          <label>Centro Qualifica / Local</label>
-          <input type="text" id="fCentro" placeholder="Ex: Centro Qualifica de Luanda" />
-        </div>
+        <label>Número de Bilhete de Identidade</label>
+        <input type="text" id="fBI" placeholder="Ex: 004567890LA042" />
       </div>
 
       <button class="btn-primary" onclick="startInterview()">Iniciar Entrevista de Orientação →</button>
@@ -642,11 +542,9 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
           <div class="cs-avatar">👤</div>
           <div>
             <div class="cs-name" id="sidebarName">—</div>
-            <div class="cs-sub" id="sidebarArea">—</div>
+            <div class="cs-sub" id="sidebarBI">—</div>
           </div>
         </div>
-        <div class="cs-tag">📅 <span id="sidebarAnos">—</span></div>
-        <div class="cs-tag">🎓 <span id="sidebarHab">—</span></div>
       </div>
       <div class="cs-topics">
         <div class="cs-label" style="margin-bottom:10px">Tópicos da Entrevista</div>
@@ -714,46 +612,10 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
               <label>Bilhete de Identidade</label>
               <div class="rp-field-value" id="rBI">—</div>
             </div>
-            <div class="rp-field">
-              <label>Província</label>
-              <div class="rp-field-value" id="rProvincia">—</div>
-            </div>
-            <div class="rp-field">
-              <label>Telefone</label>
-              <div class="rp-field-value" id="rTelefone">—</div>
-            </div>
-            <div class="rp-field">
-              <label>Email</label>
-              <div class="rp-field-value" id="rEmail">—</div>
-            </div>
-            <div class="rp-field">
-              <label>Área de Trabalho</label>
-              <div class="rp-field-value" id="rAreaTrab">—</div>
-            </div>
-            <div class="rp-field">
-              <label>Anos de Experiência</label>
-              <div class="rp-field-value" id="rAnos">—</div>
-            </div>
-            <div class="rp-field">
-              <label>Habilitações Escolares</label>
-              <div class="rp-field-value" id="rHab">—</div>
-            </div>
-            <div class="rp-field">
-              <label>Situação Profissional</label>
-              <div class="rp-field-value" id="rSit">—</div>
-            </div>
           </div>
 
           <div class="rp-section-title">Dados da Entrevista</div>
           <div class="rp-fields">
-            <div class="rp-field">
-              <label>Técnico RVC / Entrevistador</label>
-              <div class="rp-field-value" id="rTecnico">—</div>
-            </div>
-            <div class="rp-field">
-              <label>Centro Qualifica / Local</label>
-              <div class="rp-field-value" id="rCentro">—</div>
-            </div>
             <div class="rp-field">
               <label>Data da Entrevista</label>
               <div class="rp-field-value" id="rData">—</div>
@@ -854,11 +716,87 @@ textarea.form-ta { resize: none; min-height: 85px; line-height: 1.6; }
     </div>
   </div>
 
+  <!-- ══ ECRÃ: REFERENCIAIS (ADMIN) ══ -->
+  <div class="screen history-screen" id="screenReferenciais">
+    <div class="history-wrap">
+      <div class="history-header">
+        <button class="btn-back" onclick="showScreen('screenForm'); document.getElementById('stepPill').textContent='Passo 1 de 3';">← Voltar</button>
+        <h2>Referenciais RVCC</h2>
+      </div>
+
+      <div class="ref-upload-card">
+        <div class="ref-upload-title">Carregar novo referencial</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome do Perfil Profissional</label>
+            <input type="text" id="refNome" placeholder="Ex: Técnico de Energias Renováveis" />
+          </div>
+          <div class="form-group">
+            <label>Nível</label>
+            <div class="select-wrap">
+              <select id="refNivel">
+                <option value="">Selecione...</option>
+                <option>Nível 2</option>
+                <option>Nível 3</option>
+                <option>Nível 4</option>
+                <option>Nível 5</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Família Profissional</label>
+            <div class="select-wrap">
+              <select id="refFamilia" onchange="toggleNovaFamilia(this)">
+                <option value="">Selecione...</option>
+                <option>AGS — Administração, Gestão e Serviços</option>
+                <option>ART — Alojamento, Restauração e Turismo</option>
+                <option>COC — Construção Civil e Urbanismo</option>
+                <option>ENA — Electricidade, Energias e Ambiente</option>
+                <option>MTM — Metalurgia e Metalomecânica</option>
+                <option value="__nova__">+ Nova família...</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group hidden" id="refFamiliaNovaWrap">
+            <label>Nome da nova família</label>
+            <input type="text" id="refFamiliaNova" placeholder="Ex: TIC — Tecnologias de Informação" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Ficheiro do Referencial (PDF)</label>
+          <input type="file" id="refFicheiro" accept="application/pdf" />
+        </div>
+        <button class="btn-primary" id="refUploadBtn" onclick="uploadReferencial()">📤 Carregar Referencial</button>
+        <div class="ref-upload-status hidden" id="refUploadStatus"></div>
+      </div>
+
+      <div class="ref-table">
+        <div class="ref-head">
+          <div>Perfil</div>
+          <div>Família</div>
+          <div>Nível</div>
+          <div>Carregado em</div>
+          <div>PDF</div>
+          <div></div>
+        </div>
+        <div id="referenciaisBody"><div class="ht-loading">A carregar...</div></div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /.main -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
 <script>
 const WORKER_URL = 'https://rvcc.bruno-barradas-79.workers.dev';
 
@@ -919,6 +857,39 @@ async function sbQuery(filtro) {
   return res.ok ? await res.json() : [];
 }
 
+// ── Receber Nome/BI da página que encaminha o candidato ────────────────────────
+// Preferimos o fragmento (#nome=...&bi=...) porque nunca é enviado ao servidor
+// nem fica registado em logs; se não existir, aceitamos também a query string
+// (?nome=...&bi=...) como alternativa.
+function prefillFromReferrer() {
+  const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const queryParams = new URLSearchParams(location.search);
+  const nome = hashParams.get('nome') || queryParams.get('nome');
+  const bi   = hashParams.get('bi')   || queryParams.get('bi');
+
+  if (nome) {
+    const fNome = document.getElementById('fNome');
+    fNome.value = decodeURIComponent(nome);
+    fNome.readOnly = true;
+  }
+  if (bi) {
+    const fBI = document.getElementById('fBI');
+    fBI.value = decodeURIComponent(bi);
+    fBI.readOnly = true;
+  }
+  if (nome || bi) {
+    // Chegou um candidato com dados da página de encaminhamento: salta o login
+    // (que fica reservado ao acesso administrativo/histórico) e vai directo ao formulário.
+    showScreen('screenForm');
+    document.getElementById('stepPill').textContent = 'Passo 1 de 3';
+    updateProgress(0);
+    // Limpa o fragmento/URL para não deixar os dados visíveis na barra de endereço
+    window.history.replaceState(null, '', location.pathname + location.search.replace(/[?&](nome|bi)=[^&]*/g, ''));
+  }
+  // Sem candidato: a página fica no ecrã de login, reservado ao administrador/técnico.
+}
+document.addEventListener('DOMContentLoaded', prefillFromReferrer);
+
 let userData = {};
 let history  = [];
 let msgCount = 0;
@@ -944,6 +915,27 @@ const PROFILES = {
   tec_serr:      { name:'Técnico de Serralharia',          nivel:'Nível 5', familia:'MTM — Metalurgia e Metalomecânica' },
 };
 
+// Catálogo em uso pela IA e pelo relatório: começa como cópia do catálogo base
+// e é actualizado com os referenciais carregados pelo administrador.
+let ACTIVE_PROFILES = { ...PROFILES };
+
+async function loadActiveProfiles() {
+  ACTIVE_PROFILES = { ...PROFILES };
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/referenciais?select=perfil_id,perfil_nome,nivel,familia&activo=eq.true', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (res.ok) {
+      const rows = await res.json();
+      rows.forEach(r => {
+        ACTIVE_PROFILES[r.perfil_id] = { name: r.perfil_nome, nivel: r.nivel, familia: r.familia };
+      });
+    }
+  } catch {
+    // Sem ligação à tabela de referenciais: mantém-se o catálogo base.
+  }
+}
+
 function genRef() {
   const d = new Date();
   const y = d.getFullYear();
@@ -953,10 +945,10 @@ function genRef() {
 }
 
 function buildSystem() {
-  const profileList = Object.entries(PROFILES)
+  const profileList = Object.entries(ACTIVE_PROFILES)
     .map(([id, p]) => '- ' + id + ': ' + p.name + ' (' + p.nivel + ') | ' + p.familia)
     .join('\n');
-  return 'És um Técnico de Orientação Profissional do Instituto Nacional de Qualificações (INQ) de Angola. Conduzes uma entrevista para identificar o perfil RVCC Profissional mais adequado ao candidato.\n\nDADOS DO CANDIDATO:\n- Nome: ' + userData.nome + '\n- Área: ' + userData.area + '\n- Experiência: ' + userData.anos + '\n- Habilitações: ' + userData.hab + '\n- Situação: ' + userData.sit + '\n- Descrição: ' + userData.desc + '\n\nPERFIS DO CATÁLOGO INQ:\n' + profileList + '\n\nINSTRUÇÕES:\n1. Explora o percurso profissional com perguntas abertas\n2. Identifica tarefas concretas do dia-a-dia\n3. Avalia competências técnicas específicas\n4. Percebe motivações e objectivos\n5. Faz 8 a 12 perguntas no total\n\nREGRAS:\n- Faz UMA pergunta de cada vez\n- Português angolano correcto e profissional\n- Usa **negrito** para termos técnicos\n- Respostas curtas (máx 2 parágrafos)\n- Não menciones os nomes dos perfis durante a entrevista\n\nQUANDO PEDIDO O RELATÓRIO, responde APENAS com JSON válido sem texto adicional:\n{\n  "perfil_id": "id_do_perfil",\n  "competencias": ["comp 1", "comp 2", "comp 3", "comp 4"],\n  "justificacao": "2-3 frases explicando a recomendação",\n  "passos": ["Passo 1", "Passo 2", "Passo 3", "Passo 4"]\n}';
+  return 'És um Técnico de Orientação Profissional do Instituto Nacional de Qualificações (INQ) de Angola. Conduzes uma entrevista para identificar o perfil RVCC Profissional mais adequado ao candidato.\n\nDADOS DO CANDIDATO:\n- Nome: ' + userData.nome + '\n\nAinda não sabes nada sobre a área de trabalho, experiência, habilitações ou situação profissional do candidato — tens de descobrir tudo isso através das perguntas da entrevista.\n\nPERFIS DO CATÁLOGO INQ:\n' + profileList + '\n\nINSTRUÇÕES:\n1. Começa por perceber a área de trabalho e o percurso profissional com perguntas abertas\n2. Identifica tarefas concretas do dia-a-dia\n3. Avalia competências técnicas específicas\n4. Percebe as habilitações escolares, a situação profissional actual, formações realizadas e motivações/objectivos\n5. Faz 8 a 12 perguntas no total\n\nREGRAS:\n- Faz UMA pergunta de cada vez\n- Português angolano correcto e profissional\n- Usa **negrito** para termos técnicos\n- Respostas curtas (máx 2 parágrafos)\n- Não menciones os nomes dos perfis durante a entrevista\n\nQUANDO PEDIDO O RELATÓRIO, responde APENAS com JSON válido sem texto adicional:\n{\n  "perfil_id": "id_do_perfil",\n  "area": "área de trabalho identificada",\n  "anos_experiencia": "anos de experiência identificados",\n  "habilitacoes": "habilitações escolares identificadas",\n  "situacao_profissional": "situação profissional identificada",\n  "competencias": ["comp 1", "comp 2", "comp 3", "comp 4"],\n  "justificacao": "2-3 frases explicando a recomendação",\n  "passos": ["Passo 1", "Passo 2", "Passo 3", "Passo 4"]\n}';
 }
 
 function showScreen(id) {
@@ -966,30 +958,20 @@ function showScreen(id) {
 function updateProgress(pct) { document.getElementById('progressFill').style.width = pct + '%'; }
 
 async function startInterview() {
-  const nome     = document.getElementById('fNome').value.trim();
-  const bi       = document.getElementById('fBI').value.trim();
-  const provincia= document.getElementById('fProvincia').value;
-  const telefone = document.getElementById('fTelefone').value.trim();
-  const email    = document.getElementById('fEmail').value.trim();
-  const area     = document.getElementById('fArea').value;
-  const anos     = document.getElementById('fAnos').value;
-  const hab      = document.getElementById('fHab').value;
-  const sit      = document.getElementById('fSit').value;
-  const desc     = document.getElementById('fDesc').value.trim();
-  const tecnico  = document.getElementById('fTecnico').value.trim();
-  const centro   = document.getElementById('fCentro').value.trim();
+  const nome = document.getElementById('fNome').value.trim();
+  const bi   = document.getElementById('fBI').value.trim();
 
-  if (!nome || !bi || !provincia || !area || !anos || !hab || !sit || !desc) {
-    alert('Por favor preencha todos os campos obrigatórios antes de continuar.');
+  if (!nome || !bi) {
+    alert('Por favor preencha o Nome e o Número de Bilhete de Identidade antes de continuar.');
     return;
   }
 
-  userData = { nome, bi, provincia, telefone, email, area, anos, hab, sit, desc, tecnico, centro };
+  userData = { nome, bi };
 
   document.getElementById('sidebarName').textContent = nome;
-  document.getElementById('sidebarArea').textContent = area;
-  document.getElementById('sidebarAnos').textContent = anos;
-  document.getElementById('sidebarHab').textContent  = hab;
+  document.getElementById('sidebarBI').textContent   = bi;
+
+  await loadActiveProfiles();
 
   showScreen('screenChat');
   document.getElementById('stepPill').textContent = 'Passo 2 de 3';
@@ -998,7 +980,7 @@ async function startInterview() {
   loading = true;
   document.getElementById('sendBtn').disabled = true;
 
-  const opener = 'Bom dia, **' + nome + '**! Sou o Técnico de Orientação do Instituto Nacional de Qualificações e estou aqui para te ajudar a identificar o perfil RVCC Profissional mais adequado ao teu percurso.\n\nJá li a tua apresentação — tens experiência em _' + area + '_ há ' + anos.toLowerCase() + ', o que é um excelente ponto de partida para este processo.\n\nPara começarmos: **podes descrever-me um dia típico de trabalho?** Que tarefas realizas com mais frequência desde que chegas até que sais?';
+  const opener = 'Bom dia, **' + nome + '**! Sou o Técnico de Orientação do Instituto Nacional de Qualificações e estou aqui para te ajudar a identificar o perfil RVCC Profissional mais adequado ao teu percurso.\n\nPara começarmos: **em que área trabalhas actualmente, e podes descrever-me um dia típico de trabalho?** Que tarefas realizas com mais frequência desde que chegas até que sais?';
 
   history = [{ role: 'assistant', content: opener }];
   addAIMessage(opener);
@@ -1094,7 +1076,7 @@ async function requestReport() {
 }
 
 function showReport(report) {
-  const p = PROFILES[report.perfil_id] || { name: report.perfil_id, nivel: '—', familia: '—' };
+  const p = ACTIVE_PROFILES[report.perfil_id] || PROFILES[report.perfil_id] || { name: report.perfil_id, nivel: '—', familia: '—' };
   const now = new Date();
   const dateStr = now.toLocaleDateString('pt-PT', { day:'2-digit', month:'long', year:'numeric' });
   const timeStr = now.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' });
@@ -1104,15 +1086,6 @@ function showReport(report) {
   document.getElementById('rRefNum').textContent       = ref;
   document.getElementById('rNomeCompleto').textContent = userData.nome;
   document.getElementById('rBI').textContent           = userData.bi || '—';
-  document.getElementById('rProvincia').textContent    = userData.provincia || '—';
-  document.getElementById('rTelefone').textContent     = userData.telefone || '—';
-  document.getElementById('rEmail').textContent        = userData.email || '—';
-  document.getElementById('rAreaTrab').textContent     = userData.area;
-  document.getElementById('rAnos').textContent         = userData.anos;
-  document.getElementById('rHab').textContent          = userData.hab;
-  document.getElementById('rSit').textContent          = userData.sit;
-  document.getElementById('rTecnico').textContent      = userData.tecnico || 'Não especificado';
-  document.getElementById('rCentro').textContent       = userData.centro || 'Não especificado';
   document.getElementById('rData').textContent         = dateStr;
   document.getElementById('rHora').textContent         = timeStr;
 
@@ -1129,18 +1102,16 @@ function showReport(report) {
     .map((s, i) => '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div>' + s + '</div></div>').join('');
 
   document.getElementById('sigCandidato').textContent = userData.nome;
-  document.getElementById('sigTecnico').textContent   = userData.tecnico || '________________________';
+  document.getElementById('sigTecnico').textContent   = '________________________';
   document.getElementById('rFooterRef').innerHTML     = 'Ref: ' + ref + ' &nbsp;|&nbsp; ' + dateStr;
 
   // Guardar no Supabase
   sbInsert({
     referencia: ref,
-    nome: userData.nome, bi: userData.bi, provincia: userData.provincia,
-    telefone: userData.telefone, email: userData.email,
-    area: userData.area, anos_experiencia: userData.anos,
-    habilitacoes: userData.hab, situacao_profissional: userData.sit,
-    descricao: userData.desc, tecnico_rvc: userData.tecnico,
-    centro_qualifica: userData.centro, perfil_id: report.perfil_id,
+    nome: userData.nome, bi: userData.bi,
+    area: report.area, anos_experiencia: report.anos_experiencia,
+    habilitacoes: report.habilitacoes, situacao_profissional: report.situacao_profissional,
+    perfil_id: report.perfil_id,
     perfil_nome: p.name, perfil_nivel: p.nivel, perfil_familia: p.familia,
     justificacao: report.justificacao,
     competencias: report.competencias, proximos_passos: report.passos
@@ -1285,8 +1256,7 @@ function restart() {
   document.querySelectorAll('.topic-item').forEach((t, i) => {
     t.className = 'topic-item' + (i === 0 ? ' active' : '');
   });
-  ['fNome','fBI','fTelefone','fEmail','fDesc','fTecnico','fCentro'].forEach(id => document.getElementById(id).value = '');
-  ['fArea','fAnos','fHab','fSit','fProvincia'].forEach(id => document.getElementById(id).value = '');
+  ['fNome','fBI'].forEach(id => document.getElementById(id).value = '');
   showScreen('screenForm');
   document.getElementById('stepPill').textContent = 'Passo 1 de 3';
   updateProgress(0);
@@ -1312,6 +1282,11 @@ async function deleteRecord(id, nome) {
 }
 
 async function showHistory() {
+  if (!currentUser) {
+    pendingHistory = true;
+    showScreen('screenLogin');
+    return;
+  }
   showScreen('screenHistory');
   document.getElementById('stepPill').textContent = 'Histórico';
   updateProgress(0);
@@ -1531,8 +1506,185 @@ function setQuickReplies(replies) {
 function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 function autoResize(el) { el.style.height = ''; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; }
 
+// ── Referenciais (Admin) ─────────────────────────────────────────────────────
+function slugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 40) || 'perfil';
+}
+
+function toggleNovaFamilia(sel) {
+  document.getElementById('refFamiliaNovaWrap').classList.toggle('hidden', sel.value !== '__nova__');
+}
+
+async function showReferenciais() {
+  if (!currentUser) {
+    pendingReferenciais = true;
+    showScreen('screenLogin');
+    return;
+  }
+  if (currentUser.role !== 'admin') {
+    alert('Apenas administradores podem gerir referenciais.');
+    return;
+  }
+  showScreen('screenReferenciais');
+  document.getElementById('stepPill').textContent = 'Referenciais';
+  updateProgress(0);
+  await loadReferenciais();
+}
+
+async function extractPdfText(file) {
+  if (!window.pdfjsLib) return '';
+  const buf = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(' ') + '\n';
+  }
+  return text.trim();
+}
+
+async function uploadReferencial() {
+  const nome        = document.getElementById('refNome').value.trim();
+  const nivel       = document.getElementById('refNivel').value;
+  const familiaSel  = document.getElementById('refFamilia').value;
+  const familiaNova = document.getElementById('refFamiliaNova').value.trim();
+  const familia     = familiaSel === '__nova__' ? familiaNova : familiaSel;
+  const fileInput   = document.getElementById('refFicheiro');
+  const file        = fileInput.files[0];
+  const status      = document.getElementById('refUploadStatus');
+  const btn         = document.getElementById('refUploadBtn');
+
+  status.className = 'ref-upload-status hidden';
+
+  if (!nome || !nivel || !familia || !file) {
+    status.textContent = 'Preencha o nome, o nível, a família e escolha o ficheiro PDF.';
+    status.className = 'ref-upload-status err';
+    return;
+  }
+  if (file.type !== 'application/pdf') {
+    status.textContent = 'O ficheiro tem de ser um PDF.';
+    status.className = 'ref-upload-status err';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'A carregar...';
+
+  try {
+    const perfilId = slugify(nome) + '_' + Date.now().toString(36);
+    const filename = perfilId + '.pdf';
+
+    const uploadRes = await fetch(SUPABASE_URL + '/storage/v1/object/referenciais/' + filename, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/pdf',
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+    if (!uploadRes.ok) throw new Error('upload');
+    const ficheiroUrl = SUPABASE_URL + '/storage/v1/object/public/referenciais/' + filename;
+
+    let texto = '';
+    try { texto = await extractPdfText(file); } catch { /* extração de texto é opcional */ }
+
+    const insertRes = await fetch(SUPABASE_URL + '/rest/v1/referenciais', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        perfil_id: perfilId, perfil_nome: nome, nivel, familia,
+        ficheiro_url: ficheiroUrl, texto_extraido: texto.slice(0, 20000),
+        activo: true, carregado_por: currentUser.username
+      })
+    });
+    if (!insertRes.ok) throw new Error('insert');
+
+    status.textContent = 'Referencial "' + nome + '" carregado com sucesso.';
+    status.className = 'ref-upload-status ok';
+    document.getElementById('refNome').value = '';
+    document.getElementById('refNivel').value = '';
+    document.getElementById('refFamilia').value = '';
+    document.getElementById('refFamiliaNova').value = '';
+    document.getElementById('refFamiliaNovaWrap').classList.add('hidden');
+    fileInput.value = '';
+
+    await loadReferenciais();
+  } catch {
+    status.textContent = 'Erro ao carregar o referencial. Tente novamente.';
+    status.className = 'ref-upload-status err';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '📤 Carregar Referencial';
+}
+
+async function loadReferenciais() {
+  const body = document.getElementById('referenciaisBody');
+  body.innerHTML = '<div class="ht-loading">A carregar...</div>';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/referenciais?select=*&activo=eq.true&order=familia.asc,nivel.asc', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const rows = res.ok ? await res.json() : [];
+    if (!rows.length) {
+      body.innerHTML = '<div class="ht-empty">Ainda não foram carregados referenciais. A entrevista está a usar o catálogo base do sistema.</div>';
+      return;
+    }
+    body.innerHTML = rows.map(r => {
+      const d = new Date(r.created_at);
+      const dataStr = d.toLocaleDateString('pt-PT', { day:'2-digit', month:'2-digit', year:'numeric' });
+      const filename = r.ficheiro_url ? r.ficheiro_url.split('/').pop() : '';
+      return '<div class="ref-row">' +
+        '<div><strong>' + r.perfil_nome + '</strong></div>' +
+        '<div style="font-size:12px">' + r.familia + '</div>' +
+        '<div><span class="ht-badge">' + r.nivel + '</span></div>' +
+        '<div style="font-size:12px">' + dataStr + '</div>' +
+        '<div>' + (r.ficheiro_url ? '<a class="btn-ver-pdf" href="' + r.ficheiro_url + '" target="_blank">📄 Ver</a>' : '—') + '</div>' +
+        '<div>' + (currentUser && currentUser.role === 'admin'
+          ? '<button class="btn-delete" onclick="deleteReferencial(\'' + r.id + '\',\'' + filename + '\')">🗑</button>'
+          : '') + '</div>' +
+      '</div>';
+    }).join('');
+  } catch {
+    body.innerHTML = '<div class="ht-empty">Erro ao carregar referenciais.</div>';
+  }
+}
+
+async function deleteReferencial(id, filename) {
+  if (!confirm('Remover este referencial? O ficheiro PDF também será apagado.')) return;
+  try {
+    if (filename) {
+      await fetch(SUPABASE_URL + '/storage/v1/object/referenciais/' + filename, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+    }
+    await fetch(SUPABASE_URL + '/rest/v1/referenciais?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    await loadReferenciais();
+  } catch {
+    alert('Erro ao remover o referencial.');
+  }
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 let currentUser = null;
+let pendingHistory = false; // true when login was triggered by "Histórico"
+let pendingReferenciais = false; // true when login was triggered by "Referenciais"
 
 async function doLogin() {
   const user = document.getElementById('lUser').value.trim();
@@ -1557,9 +1709,17 @@ async function doLogin() {
       document.getElementById('userInfo').classList.remove('hidden');
       document.getElementById('lUser').value = '';
       document.getElementById('lPass').value = '';
-      showScreen('screenForm');
-      document.getElementById('stepPill').textContent = 'Passo 1 de 3';
-      updateProgress(0);
+      if (pendingHistory) {
+        pendingHistory = false;
+        await showHistory();
+      } else if (pendingReferenciais) {
+        pendingReferenciais = false;
+        await showReferenciais();
+      } else {
+        showScreen('screenForm');
+        document.getElementById('stepPill').textContent = 'Passo 1 de 3';
+        updateProgress(0);
+      }
     } else {
       err.textContent = 'Utilizador ou palavra-passe incorretos.';
       err.classList.remove('hidden');
@@ -1574,6 +1734,8 @@ async function doLogin() {
 
 function doLogout() {
   currentUser = null;
+  pendingHistory = false;
+  pendingReferenciais = false;
   document.getElementById('userInfo').classList.add('hidden');
   document.getElementById('stepPill').textContent = '';
   updateProgress(0);
