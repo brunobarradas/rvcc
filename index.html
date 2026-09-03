@@ -1589,7 +1589,10 @@ async function uploadReferencial() {
       },
       body: file
     });
-    if (!uploadRes.ok) throw new Error('upload');
+    if (!uploadRes.ok) {
+      const msg = await uploadRes.text().catch(() => '');
+      throw new Error('Falha ao carregar o PDF (' + uploadRes.status + '): ' + msg);
+    }
     const ficheiroUrl = SUPABASE_URL + '/storage/v1/object/public/referenciais/' + filename;
 
     let texto = '';
@@ -1609,7 +1612,10 @@ async function uploadReferencial() {
         activo: true, carregado_por: currentUser.username
       })
     });
-    if (!insertRes.ok) throw new Error('insert');
+    if (!insertRes.ok) {
+      const msg = await insertRes.text().catch(() => '');
+      throw new Error('Falha ao guardar na base de dados (' + insertRes.status + '): ' + msg);
+    }
 
     status.textContent = 'Referencial "' + nome + '" carregado com sucesso.';
     status.className = 'ref-upload-status ok';
@@ -1621,8 +1627,8 @@ async function uploadReferencial() {
     fileInput.value = '';
 
     await loadReferenciais();
-  } catch {
-    status.textContent = 'Erro ao carregar o referencial. Tente novamente.';
+  } catch (e) {
+    status.textContent = (e && e.message) ? e.message : 'Erro ao carregar o referencial. Tente novamente.';
     status.className = 'ref-upload-status err';
   }
 
